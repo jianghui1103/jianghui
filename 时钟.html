@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>时钟</title>
+</head>
+<style>
+html{
+            background: #000;
+            color: #666;
+            font-size: 12px;
+            overflow:hidden;
+        }
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        span{
+            display: block;
+            float: left;
+        }
+        .on{
+            color: #fff;
+        }
+        .wrapper{
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            left:50%;
+            top:50%;
+            margin-top: -100px;
+            margin-left: -100px;
+        }
+        .wrapper .timebox{
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            top: 0;
+            left:0;
+            border-radius: 100%;
+            transition: all 0.5s;
+        }
+        .timebox span{
+            transition: all 0.5s;
+            float: left;
+        }
+        .wrapper  .timebox span{
+            position: absolute;
+            left:50%;
+            top:50%;
+            width: 40px;
+            height: 18px;
+            margin-top: -9px;
+            margin-left: -20px;
+            text-align: right;
+        }
+</style>
+<body>
+<div id="wrapper">
+    <div class="timebox circleBox" id="mouthBox"></div>
+    <div class="timebox circleBox" id="dayBox"></div>
+    <div class="timebox circleBox" id="hourBox"></div>
+    <div class="timebox circleBox" id="minuteBox"></div>
+    <div class="timebox circleBox" id="secondBox"></div>
+</div>
+
+<script>
+    class timer{
+        constructor(){
+            let wrapper = document.getElementById("wrapper");
+            let mouthBox = document.getElementById("mouthBox");
+            let dayBox = document.getElementById("dayBox");
+            let hourBox = document.getElementById("hourBox");
+            let minuteBox = document.getElementById("minuteBox");
+            let secondBox = document.getElementById("secondBox");
+            this.initMouth();
+            this.initDay();
+            this.initHour();
+            this.initMinute();
+            this.initSecond();
+            this.mainFn()
+        }
+        //插入月份
+        initMouth(){
+            for(let i=1;i<=12;i++){
+                let span = document.createElement("span");
+                span.innerHTML = i+"月";
+                this.initBox(mouthBox,span);
+            }
+        }
+
+        //插入日期
+        initDay(){
+            // 获取当前月份共多少天
+            let nowDay =  new Date(this.showNow().year, this.showNow().mouth, 0).getDate()
+            console.log(nowDay)
+            for(let i=1;i<=nowDay;i++){
+                let span = document.createElement("span");
+                span.innerHTML = i+"日";
+                this.initBox(dayBox,span);
+            }
+        }
+        //插入小时
+        initHour(){
+            for(let i=0;i<24;i++){
+                let span = document.createElement("span");
+                span.innerHTML = i+"时";
+                this.initBox(hourBox,span);
+            }
+        }
+        //插入分钟
+        initMinute(){
+            for(let i=0;i<60;i++){
+                let span = document.createElement("span");
+                span.innerHTML = i+"分";
+                this.initBox(minuteBox,span);
+            }
+        }
+        //插入秒
+        initSecond(){
+            for(let i=0;i<60;i++){
+                let span = document.createElement("span");
+                span.innerHTML = i+"秒";
+                this.initBox(secondBox,span);
+            }
+        }
+        initBox(box,e){
+            box.appendChild(e);
+        }
+        //获取今天的时间戳
+        showNow(){
+            let timeDate = new Date();
+            return {
+                year:timeDate.getFullYear(),
+                mouth:timeDate.getMonth()+1,
+                day:timeDate.getDate(),
+                hour:timeDate.getHours(),
+                minute:timeDate.getMinutes(),
+                second:timeDate.getSeconds(),
+            }
+        }
+        //获取现在时间（不返回）
+        showNowTime(){
+            let timeData = new Date();
+            let mouth = timeData.getMonth()+1;
+            let day = timeData.getDate();
+            let hour = timeData.getHours();
+            let minute = timeData.getMinutes();
+            let second = timeData.getSeconds();
+            this.changeTime(mouthBox.children[mouth]);
+            this.changeTime(dayBox.children[day-1]);
+            this.changeTime(hourBox.children[hour]);
+            this.changeTime(minuteBox.children[minute]);
+            this.changeTime(secondBox.children[second]);
+        }
+        //切换时间
+        changeTime(tag){
+            tag.className = "on";
+            this.removeSiblingClass(tag);
+        }
+        //移除兄弟元素的样式
+        removeSiblingClass(tag){
+            let fb = tag.parentNode.children;
+            for(let i=0;i<fb.length;i++){
+                if(fb[i]!==tag){
+                    fb[i].className ="";
+                }
+            }
+        }
+        //时间字体环绕
+        textRound(tag,num,dis){
+            let span = tag.children;
+            for(let i=0;i<span.length;i++){
+                span[i].style.transform = "rotate("+(360/span.length)*i+"deg) translateX("+dis+"px)";
+            }
+        }
+        textRotate(tag,num){
+            tag.style.transform="rotate("+num+"deg)"
+
+        }
+        //主要执行函数
+        mainFn(){
+            setInterval(function(){
+                this.showNowTime()
+            }.bind(this),1000)
+
+            setTimeout(function(){
+                wrapper.className = "wrapper";
+                this.textRound(mouthBox,12,40)
+                this.textRound(dayBox,new Date(this.showNow().year, this.showNow().mouth, 0).getDate(),80)
+                this.textRound(hourBox,24,120)
+                this.textRound(minuteBox,60,160)
+                this.textRound(secondBox,60,200)
+                let that = this;
+                setInterval(function(){
+                    that.textRotate(mouthBox,-360/12*that.showNow().mouth);
+                    that.textRotate(dayBox,-360/new Date(that.showNow().year, that.showNow().mouth, 0).getDate()*(that.showNow().day-1))
+                    that.textRotate(hourBox,-360/24*that.showNow().hour)
+                    that.textRotate(minuteBox,-360/60*that.showNow().minute)
+                    that.textRotate(secondBox,-360/60*that.showNow().second)
+                },1000)
+            }.call(this),2000)
+        }
+    }
+
+    let timerObj = new timer;
+</script>
+</body>
+</html>
